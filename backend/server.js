@@ -1,18 +1,51 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config({ path: '../.env' });
 const { initDB } = require('./db');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
 
-// Middleware
-app.use(cors());
+// Security middleware
+app.use(helmet());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true,
+}));
 app.use(express.json({ limit: '10mb' }));
+
+// AI rate limiter: 20 req/hour keyed by user ID or IP
+const aiRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  keyGenerator: (req) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return `user_${decoded.id}`;
+      } catch {}
+    }
+    return req.ip;
+  },
+  message: { error: 'Too many AI requests. Limit is 20 per hour.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply AI rate limiter to all AI routes
+app.use('/api/ai', aiRateLimiter);
+app.use(/^\/api\/prompts\/\d+\/(ab-test|security-scan|deploy)/, aiRateLimiter);
+app.use('/api/prompts/check-pii', aiRateLimiter);
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/prompts', require('./routes/prompts'));
+app.use('/api/templates', require('./routes/templates'));
 app.use('/api/versions', require('./routes/versions'));
 app.use('/api/ab-tests', require('./routes/abtests'));
 app.use('/api/optimization', require('./routes/optimization'));
@@ -41,9 +74,89 @@ app.use('/api/api-keys', require('./routes/apikeys'));
 app.use('/api/folders', require('./routes/folders'));
 app.use('/api/snippets', require('./routes/snippets'));
 
+// Public deployed prompt endpoint (no auth - uses API key in header)
+const { pool } = require('./db');
+const crypto = require('crypto');
+
+const MODEL_DEPLOYED = process.env.OPENROUTER_MODEL || 'anthropic/claude-3-5-sonnet-20241022';
+
+app.post('/api/deployed/:deploymentKey', async (req, res) => {
+  try {
+    const { deploymentKey } = req.params;
+    const { input } = req.body;
+
+    const authHeader = req.headers['authorization'];
+    const providedKey = authHeader && authHeader.replace('Bearer ', '');
+
+    if (!input) return res.status(400).json({ error: 'input is required' });
+
+    // Lookup deployment
+    await pool.query(`ALTER TABLE deployments ADD COLUMN IF NOT EXISTS deployment_key VARCHAR(255)`);
+    await pool.query(`ALTER TABLE deployments ADD COLUMN IF NOT EXISTS hmac_secret VARCHAR(255)`);
+
+    const dep = await pool.query(
+      `SELECT d.*, pt.content as prompt_content, pt.model, pt.temperature, pt.max_tokens
+       FROM deployments d LEFT JOIN prompt_templates pt ON d.prompt_id=pt.id
+       WHERE d.deployment_key=$1 AND d.status='active'`,
+      [deploymentKey]
+    );
+
+    if (dep.rows.length === 0) return res.status(404).json({ error: 'Deployment not found or inactive' });
+    const deployment = dep.rows[0];
+
+    // Validate X-Signature HMAC if provided
+    const xSig = req.headers['x-signature'];
+    if (xSig && deployment.hmac_secret) {
+      const expectedSig = crypto.createHmac('sha256', deployment.hmac_secret).update(JSON.stringify(req.body)).digest('hex');
+      if (xSig !== `sha256=${expectedSig}`) {
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+    }
+
+    // Validate API key
+    if (providedKey !== deployment.api_key) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+
+    // Run prompt
+    const startTime = Date.now();
+    const promptText = deployment.prompt_content.replace(/\{\{input\}\}/g, input).replace(/\{\{user_input\}\}/g, input);
+
+    const aiRes = await fetch(process.env.OPENROUTER_BASE_URL + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': process.env.CLIENT_URL || 'http://localhost:3000',
+        'X-Title': 'AI Prompt Engineering Studio',
+      },
+      body: JSON.stringify({
+        model: deployment.model || MODEL_DEPLOYED,
+        messages: [{ role: 'user', content: promptText }],
+        temperature: parseFloat(deployment.temperature) || 0.7,
+        max_tokens: deployment.max_tokens || 1024,
+      }),
+    });
+
+    if (!aiRes.ok) throw new Error(`AI error: ${aiRes.status}`);
+    const aiData = await aiRes.json();
+    const output = aiData.choices[0].message.content;
+    const latency = Date.now() - startTime;
+
+    // Update stats
+    await pool.query(
+      `UPDATE deployments SET total_requests=total_requests+1, avg_latency_ms=$1, updated_at=NOW() WHERE deployment_key=$2`,
+      [latency, deploymentKey]
+    );
+
+    res.json({ output, latency_ms: latency, deployment_name: deployment.name });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Dashboard stats
 const { authenticateToken } = require('./middleware/auth');
-const { pool } = require('./db');
 
 app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
   try {

@@ -30,6 +30,12 @@ import ApiKeys from './pages/ApiKeys';
 import Folders from './pages/Folders';
 import Snippets from './pages/Snippets';
 import Layout from './components/Layout';
+import ABTestRunner from './pages/ABTestRunner';
+import SecurityScanner from './pages/SecurityScanner';
+import PIIChecker from './pages/PIIChecker';
+import DeploymentManager from './pages/DeploymentManager';
+import VersionHistory from './pages/VersionHistory';
+import TemplateLibrary from './pages/TemplateLibrary';
 
 const globalStyles = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -112,6 +118,12 @@ function App() {
                   <Route path="/api-keys" element={<ApiKeys />} />
                   <Route path="/folders" element={<Folders />} />
                   <Route path="/snippets" element={<Snippets />} />
+                  <Route path="/ab-test-runner" element={<ABTestRunner />} />
+                  <Route path="/security-scanner" element={<SecurityScanner />} />
+                  <Route path="/pii-checker" element={<PIIChecker />} />
+                  <Route path="/deployment-manager" element={<DeploymentManager />} />
+                  <Route path="/version-history" element={<VersionHistory />} />
+                  <Route path="/template-library" element={<TemplateLibrary />} />
                 </Routes>
               </Layout>
             ) : <Navigate to="/login" />

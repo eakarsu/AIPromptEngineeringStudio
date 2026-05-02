@@ -9,11 +9,11 @@ const callOpenRouter = async (messages, options = {}) => {
     headers: {
       'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'http://localhost:3000',
+      'HTTP-Referer': process.env.CLIENT_URL || 'http://localhost:3000',
       'X-Title': 'AI Prompt Engineering Studio'
     },
     body: JSON.stringify({
-      model: options.model || process.env.OPENROUTER_MODEL,
+      model: options.model || process.env.OPENROUTER_MODEL || 'anthropic/claude-3-5-sonnet-20241022',
       messages,
       temperature: options.temperature || 0.7,
       max_tokens: options.max_tokens || 1024,

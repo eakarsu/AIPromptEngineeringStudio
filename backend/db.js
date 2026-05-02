@@ -48,7 +48,7 @@ const initDB = async () => {
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         is_public BOOLEAN DEFAULT false,
         tags TEXT[] DEFAULT '{}',
-        model VARCHAR(100) DEFAULT 'anthropic/claude-haiku-4.5',
+        model VARCHAR(100) DEFAULT 'anthropic/claude-3-5-sonnet-20241022',
         temperature DECIMAL(3,2) DEFAULT 0.7,
         max_tokens INTEGER DEFAULT 1024,
         status VARCHAR(50) DEFAULT 'draft',
@@ -237,7 +237,7 @@ const initDB = async () => {
         name VARCHAR(255) DEFAULT 'Untitled Session',
         prompt_text TEXT,
         system_prompt TEXT,
-        model VARCHAR(100) DEFAULT 'anthropic/claude-haiku-4.5',
+        model VARCHAR(100) DEFAULT 'anthropic/claude-3-5-sonnet-20241022',
         temperature DECIMAL(3,2) DEFAULT 0.7,
         max_tokens INTEGER DEFAULT 1024,
         response_text TEXT,
@@ -293,7 +293,7 @@ const initDB = async () => {
         language VARCHAR(10) DEFAULT 'en',
         notifications_enabled BOOLEAN DEFAULT true,
         email_notifications BOOLEAN DEFAULT false,
-        default_model VARCHAR(100) DEFAULT 'anthropic/claude-haiku-4.5',
+        default_model VARCHAR(100) DEFAULT 'anthropic/claude-3-5-sonnet-20241022',
         default_temperature DECIMAL(3,2) DEFAULT 0.7,
         default_max_tokens INTEGER DEFAULT 1024,
         timezone VARCHAR(100) DEFAULT 'UTC',
@@ -438,6 +438,21 @@ const initDB = async () => {
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       );
+
+      -- AI Results table (persists all AI responses)
+      CREATE TABLE IF NOT EXISTS ai_results (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        endpoint VARCHAR(100) NOT NULL,
+        prompt_id INTEGER REFERENCES prompt_templates(id) ON DELETE SET NULL,
+        result TEXT,
+        result_json JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+
+      -- Add deployment columns if missing
+      ALTER TABLE deployments ADD COLUMN IF NOT EXISTS hmac_secret VARCHAR(255);
+      ALTER TABLE deployments ADD COLUMN IF NOT EXISTS deployment_key VARCHAR(255);
     `);
     console.log('Database tables initialized successfully');
   } catch (err) {

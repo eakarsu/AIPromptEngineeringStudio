@@ -18,20 +18,28 @@ const menuSections = [
   ]},
   { label: 'TEST & DEPLOY', items: [
     { path: '/ab-tests', label: 'A/B Tests', icon: '⇄' },
+    { path: '/ab-test-runner', label: 'A/B Runner', icon: '▶' },
     { path: '/optimization', label: 'Optimization', icon: '⚡' },
     { path: '/evaluations', label: 'Evaluations', icon: '✓' },
     { path: '/deployments', label: 'Deployments', icon: '🚀' },
+    { path: '/deployment-manager', label: 'Deploy Prompt', icon: '🔗' },
   ]},
   { label: 'ORGANIZE', items: [
     { path: '/categories', label: 'Categories', icon: '🏷' },
     { path: '/tags', label: 'Tags', icon: '🏷' },
     { path: '/library', label: 'Library', icon: '📚' },
+    { path: '/template-library', label: 'Template Library', icon: '📋' },
     { path: '/comments', label: 'Comments', icon: '💬' },
+    { path: '/version-history', label: 'Version History', icon: '⎇' },
   ]},
   { label: 'INSIGHTS', items: [
     { path: '/analytics', label: 'Analytics', icon: '📊' },
     { path: '/costs', label: 'Cost Tracking', icon: '💰' },
     { path: '/activity', label: 'Activity Log', icon: '📋' },
+  ]},
+  { label: 'SECURITY', items: [
+    { path: '/security-scanner', label: 'Security Scanner', icon: '🛡' },
+    { path: '/pii-checker', label: 'PII Checker', icon: '🔒' },
   ]},
   { label: 'SETTINGS', items: [
     { path: '/teams', label: 'Teams', icon: '👥' },
