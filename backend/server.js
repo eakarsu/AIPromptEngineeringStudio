@@ -239,3 +239,18 @@ const start = async () => {
 };
 
 start();
+
+// AI feature mount: regression-test
+app.use('/api/ai/regression-test', require('./routes/ai-regression-test'));
+// === Batch 07 Gaps & Frontend Mounts ===
+app.use('/api/gap-no-ai-prompt-classification-autotag-by-domai', require('./routes/gap-no-ai-prompt-classification-autotag-by-domai'));
+app.use('/api/gap-no-multilanguage-prompt-translation', require('./routes/gap-no-multilanguage-prompt-translation'));
+app.use('/api/gap-no-ai-piiinjection-security-scanning-ui-stub', require('./routes/gap-no-ai-piiinjection-security-scanning-ui-stub'));
+app.use('/api/gap-no-ai-regression-testing-against-golden-outp', require('./routes/gap-no-ai-regression-testing-against-golden-outp'));
+app.use('/api/gap-no-ai-modelspecific-prompt-rewriter-claude-v', require('./routes/gap-no-ai-modelspecific-prompt-rewriter-claude-v'));
+app.use('/api/gap-no-public-prompt-marketplace-discovery-forki', require('./routes/gap-no-public-prompt-marketplace-discovery-forki'));
+app.use('/api/gap-no-production-model-registry-beyond-deployme', require('./routes/gap-no-production-model-registry-beyond-deployme'));
+app.use('/api/gap-limited-realtime-collaborative-editing-no-cr', require('./routes/gap-limited-realtime-collaborative-editing-no-cr'));
+app.use('/api/gap-no-gitstyle-visual-diff-for-prompt-versions', require('./routes/gap-no-gitstyle-visual-diff-for-prompt-versions'));
+app.use('/api/gap-no-ssoenterprise-auth-provider-integration', require('./routes/gap-no-ssoenterprise-auth-provider-integration'));
+// === End Batch 07 ===

@@ -40,6 +40,7 @@ const menuSections = [
   { label: 'SECURITY', items: [
     { path: '/security-scanner', label: 'Security Scanner', icon: '🛡' },
     { path: '/pii-checker', label: 'PII Checker', icon: '🔒' },
+    { path: '/classify-prompt', label: 'Classify Prompt', icon: '🏷️' },
   ]},
   { label: 'SETTINGS', items: [
     { path: '/teams', label: 'Teams', icon: '👥' },
