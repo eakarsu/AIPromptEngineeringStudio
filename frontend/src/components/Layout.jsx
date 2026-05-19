@@ -36,6 +36,7 @@ const menuSections = [
     { path: '/analytics', label: 'Analytics', icon: '📊' },
     { path: '/costs', label: 'Cost Tracking', icon: '💰' },
     { path: '/activity', label: 'Activity Log', icon: '📋' },
+    { path: '/custom-views', label: 'Prompt Views', icon: '📈' },
   ]},
   { label: 'SECURITY', items: [
     { path: '/security-scanner', label: 'Security Scanner', icon: '🛡' },

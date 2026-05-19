@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator } = require('express-rate-limit');
 require('dotenv').config({ path: '../.env' });
 const { initDB } = require('./db');
 
@@ -30,7 +31,7 @@ const aiRateLimiter = rateLimit({
         return `user_${decoded.id}`;
       } catch {}
     }
-    return req.ip;
+    return ipKeyGenerator(req.ip);
   },
   message: { error: 'Too many AI requests. Limit is 20 per hour.' },
   standardHeaders: true,
@@ -73,6 +74,9 @@ app.use('/api/webhooks', require('./routes/webhooks'));
 app.use('/api/api-keys', require('./routes/apikeys'));
 app.use('/api/folders', require('./routes/folders'));
 app.use('/api/snippets', require('./routes/snippets'));
+
+// Custom Views (Prompt Views) - mounted before any 404 handler
+app.use('/api/custom-views', require('./routes/customViews'));
 
 // Public deployed prompt endpoint (no auth - uses API key in header)
 const { pool } = require('./db');

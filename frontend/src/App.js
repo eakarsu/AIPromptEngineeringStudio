@@ -37,6 +37,7 @@ import DeploymentManager from './pages/DeploymentManager';
 import VersionHistory from './pages/VersionHistory';
 import TemplateLibrary from './pages/TemplateLibrary';
 import ClassifyPrompt from './pages/ClassifyPrompt';
+import CustomViewsPage from './pages/CustomViewsPage';
 
 // === Batch 07 Gaps & Frontend Mounts ===
 import CfRegressionTestSuiteForPrompts from './pages/CfRegressionTestSuiteForPrompts';
@@ -146,6 +147,7 @@ function App() {
                   <Route path="/version-history" element={<VersionHistory />} />
                   <Route path="/template-library" element={<TemplateLibrary />} />
                   <Route path="/classify-prompt" element={<ClassifyPrompt />} />
+                  <Route path="/custom-views" element={<CustomViewsPage />} />
           // === Batch 07 Gaps & Frontend Mounts ===
           <Route path='/cf-regression-test-suite-for-prompts' element={<CfRegressionTestSuiteForPrompts />} />
           <Route path='/cf-modelspecific-prompt-compilation' element={<CfModelspecificPromptCompilation />} />
