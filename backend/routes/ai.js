@@ -315,4 +315,56 @@ router.post('/generate-prompt', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/ai/classify-prompt - identify domain/type/intent of a prompt
+router.post('/classify-prompt', authenticateToken, async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) return res.status(400).json({ error: 'prompt is required' });
+
+    const messages = [
+      { role: 'system', content: 'You are an expert prompt taxonomy classifier. Return ONLY valid JSON.' },
+      { role: 'user', content: `Classify this prompt across multiple dimensions and return JSON only:
+
+PROMPT:
+"""
+${prompt}
+"""
+
+Return JSON:
+{
+  "domain": "string",
+  "task_type": "qa|generation|extraction|summarization|reasoning|classification|coding|other",
+  "intent": "string",
+  "subjects": ["string"],
+  "tone": "casual|neutral|professional|technical|creative",
+  "audience": "string",
+  "complexity": "low|medium|high",
+  "expected_output_format": "text|json|markdown|code|table|list|other",
+  "language": "string",
+  "tags": ["string"],
+  "summary": "string"
+}` }
+    ];
+
+    const aiResponse = await callOpenRouter(messages, { temperature: 0.2, max_tokens: 1024 });
+    const responseText = aiResponse.choices?.[0]?.message?.content || '';
+
+    let parsed = null;
+    try {
+      const m = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
+      const jsonStr = m ? m[1].trim() : (responseText.match(/\{[\s\S]*\}/) || [])[0];
+      if (jsonStr) parsed = JSON.parse(jsonStr);
+    } catch (_) {}
+
+    res.json({
+      response: responseText,
+      classification: parsed,
+      usage: aiResponse.usage,
+      model: aiResponse.model
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

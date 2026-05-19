@@ -36,6 +36,28 @@ import PIIChecker from './pages/PIIChecker';
 import DeploymentManager from './pages/DeploymentManager';
 import VersionHistory from './pages/VersionHistory';
 import TemplateLibrary from './pages/TemplateLibrary';
+import ClassifyPrompt from './pages/ClassifyPrompt';
+import CustomViewsPage from './pages/CustomViewsPage';
+
+// === Batch 07 Gaps & Frontend Mounts ===
+import CfRegressionTestSuiteForPrompts from './pages/CfRegressionTestSuiteForPrompts';
+import CfModelspecificPromptCompilation from './pages/CfModelspecificPromptCompilation';
+import CfCostPredictionByVolume from './pages/CfCostPredictionByVolume';
+import CfPromptLineageGraph from './pages/CfPromptLineageGraph';
+import CfAbTestMarketplace from './pages/CfAbTestMarketplace';
+import CfAgenticPromptRefinement from './pages/CfAgenticPromptRefinement';
+import GapNoAiPromptClassificationAutotagByDomai from './pages/GapNoAiPromptClassificationAutotagByDomai';
+import GapNoMultilanguagePromptTranslation from './pages/GapNoMultilanguagePromptTranslation';
+import GapNoAiPiiinjectionSecurityScanningUiStub from './pages/GapNoAiPiiinjectionSecurityScanningUiStub';
+import GapNoAiRegressionTestingAgainstGoldenOutp from './pages/GapNoAiRegressionTestingAgainstGoldenOutp';
+import GapNoAiModelspecificPromptRewriterClaudeV from './pages/GapNoAiModelspecificPromptRewriterClaudeV';
+import GapNoPublicPromptMarketplaceDiscoveryForki from './pages/GapNoPublicPromptMarketplaceDiscoveryForki';
+import GapNoProductionModelRegistryBeyondDeployme from './pages/GapNoProductionModelRegistryBeyondDeployme';
+import GapLimitedRealtimeCollaborativeEditingNoCr from './pages/GapLimitedRealtimeCollaborativeEditingNoCr';
+import GapNoGitstyleVisualDiffForPromptVersions from './pages/GapNoGitstyleVisualDiffForPromptVersions';
+import GapNoSsoenterpriseAuthProviderIntegration from './pages/GapNoSsoenterpriseAuthProviderIntegration';
+// === End Batch 07 ===
+
 
 const globalStyles = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -124,6 +146,26 @@ function App() {
                   <Route path="/deployment-manager" element={<DeploymentManager />} />
                   <Route path="/version-history" element={<VersionHistory />} />
                   <Route path="/template-library" element={<TemplateLibrary />} />
+                  <Route path="/classify-prompt" element={<ClassifyPrompt />} />
+                  <Route path="/custom-views" element={<CustomViewsPage />} />
+          // === Batch 07 Gaps & Frontend Mounts ===
+          <Route path='/cf-regression-test-suite-for-prompts' element={<CfRegressionTestSuiteForPrompts />} />
+          <Route path='/cf-modelspecific-prompt-compilation' element={<CfModelspecificPromptCompilation />} />
+          <Route path='/cf-cost-prediction-by-volume' element={<CfCostPredictionByVolume />} />
+          <Route path='/cf-prompt-lineage-graph' element={<CfPromptLineageGraph />} />
+          <Route path='/cf-ab-test-marketplace' element={<CfAbTestMarketplace />} />
+          <Route path='/cf-agentic-prompt-refinement' element={<CfAgenticPromptRefinement />} />
+          <Route path='/gap-no-ai-prompt-classification-autotag-by-domai' element={<GapNoAiPromptClassificationAutotagByDomai />} />
+          <Route path='/gap-no-multilanguage-prompt-translation' element={<GapNoMultilanguagePromptTranslation />} />
+          <Route path='/gap-no-ai-piiinjection-security-scanning-ui-stub' element={<GapNoAiPiiinjectionSecurityScanningUiStub />} />
+          <Route path='/gap-no-ai-regression-testing-against-golden-outp' element={<GapNoAiRegressionTestingAgainstGoldenOutp />} />
+          <Route path='/gap-no-ai-modelspecific-prompt-rewriter-claude-v' element={<GapNoAiModelspecificPromptRewriterClaudeV />} />
+          <Route path='/gap-no-public-prompt-marketplace-discovery-forki' element={<GapNoPublicPromptMarketplaceDiscoveryForki />} />
+          <Route path='/gap-no-production-model-registry-beyond-deployme' element={<GapNoProductionModelRegistryBeyondDeployme />} />
+          <Route path='/gap-limited-realtime-collaborative-editing-no-cr' element={<GapLimitedRealtimeCollaborativeEditingNoCr />} />
+          <Route path='/gap-no-gitstyle-visual-diff-for-prompt-versions' element={<GapNoGitstyleVisualDiffForPromptVersions />} />
+          <Route path='/gap-no-ssoenterprise-auth-provider-integration' element={<GapNoSsoenterpriseAuthProviderIntegration />} />
+          // === End Batch 07 ===
                 </Routes>
               </Layout>
             ) : <Navigate to="/login" />

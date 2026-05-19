@@ -36,10 +36,12 @@ const menuSections = [
     { path: '/analytics', label: 'Analytics', icon: '📊' },
     { path: '/costs', label: 'Cost Tracking', icon: '💰' },
     { path: '/activity', label: 'Activity Log', icon: '📋' },
+    { path: '/custom-views', label: 'Prompt Views', icon: '📈' },
   ]},
   { label: 'SECURITY', items: [
     { path: '/security-scanner', label: 'Security Scanner', icon: '🛡' },
     { path: '/pii-checker', label: 'PII Checker', icon: '🔒' },
+    { path: '/classify-prompt', label: 'Classify Prompt', icon: '🏷️' },
   ]},
   { label: 'SETTINGS', items: [
     { path: '/teams', label: 'Teams', icon: '👥' },
