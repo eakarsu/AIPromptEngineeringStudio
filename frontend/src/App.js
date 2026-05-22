@@ -56,6 +56,11 @@ import GapNoProductionModelRegistryBeyondDeployme from './pages/GapNoProductionM
 import GapLimitedRealtimeCollaborativeEditingNoCr from './pages/GapLimitedRealtimeCollaborativeEditingNoCr';
 import GapNoGitstyleVisualDiffForPromptVersions from './pages/GapNoGitstyleVisualDiffForPromptVersions';
 import GapNoSsoenterpriseAuthProviderIntegration from './pages/GapNoSsoenterpriseAuthProviderIntegration';
+import CodexCustomVizFeature from './pages/CodexCustomVizFeature';
+import CodexOperationsFeature from './pages/CodexOperationsFeature';
+
+import TimelineView from './pages/TimelineView';
+
 // === End Batch 07 ===
 
 
@@ -107,6 +112,10 @@ function App() {
       <style>{globalStyles}</style>
       <Router>
         <Routes>
+        <Route path="/insights/timeline" element={<TimelineView />} />
+        <Route path="/codex/custom-viz" element={<CodexCustomVizFeature />} />
+        <Route path="/codex/operations" element={<CodexOperationsFeature />} />
+
           <Route path="/login" element={!token ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
           <Route path="/*" element={
             token ? (
