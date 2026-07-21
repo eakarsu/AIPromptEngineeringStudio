@@ -5,17 +5,22 @@ const rateLimit = require('express-rate-limit');
 const { ipKeyGenerator } = require('express-rate-limit');
 require('dotenv').config({ path: '../.env' });
 const { initDB } = require('./db');
+const { validateRuntime } = require('./governance/runtime');
+const { createProviderGate } = require('./governance/providerGate');
+const governanceRouter = require('./governance/router');
+const { authenticateToken } = require('./middleware/auth');
+
+validateRuntime();
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true,
-}));
+const allowedOrigins=String(process.env.CORS_ORIGINS||process.env.CLIENT_URL||'http://localhost:3000').split(',').map(v=>v.trim()).filter(Boolean);
+app.use(cors({origin:(origin,cb)=>!origin||allowedOrigins.includes(origin)?cb(null,true):cb(new Error('Origin not allowed by CORS')),credentials:true}));
 app.use(express.json({ limit: '10mb' }));
+app.use(createProviderGate(['/api/ai','/api/gap','/api/deployed','/api/playground','/api/optimization']));
 
 // AI rate limiter: 20 req/hour keyed by user ID or IP
 const aiRateLimiter = rateLimit({
@@ -45,6 +50,8 @@ app.use('/api/prompts/check-pii', aiRateLimiter);
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.get('/api/health', (_req,res)=>res.json({status:'ok',timestamp:new Date().toISOString()}));
+app.use('/api', authenticateToken);
 app.use('/api/prompts', require('./routes/prompts'));
 app.use('/api/templates', require('./routes/templates'));
 app.use('/api/versions', require('./routes/versions'));
@@ -74,6 +81,7 @@ app.use('/api/webhooks', require('./routes/webhooks'));
 app.use('/api/api-keys', require('./routes/apikeys'));
 app.use('/api/folders', require('./routes/folders'));
 app.use('/api/snippets', require('./routes/snippets'));
+app.use('/api/governed-prompt-runs', governanceRouter);
 
 // Custom Views (Prompt Views) - mounted before any 404 handler
 app.use('/api/custom-views', require('./routes/customViews'));
@@ -160,8 +168,6 @@ app.post('/api/deployed/:deploymentKey', async (req, res) => {
 });
 
 // Dashboard stats
-const { authenticateToken } = require('./middleware/auth');
-
 app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -232,7 +238,7 @@ app.get('/api/health', (req, res) => {
 // Start server
 const start = async () => {
   try {
-    await initDB();
+    if (process.env.ENABLE_LEGACY_SCHEMA_BOOTSTRAP === 'true') await initDB();
     app.listen(PORT, () => {
       console.log(`Backend server running on port ${PORT}`);
     });
