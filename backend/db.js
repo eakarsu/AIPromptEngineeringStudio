@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: '../.env' });
 
 const pool = new Pool({
@@ -463,4 +464,17 @@ const initDB = async () => {
   }
 };
 
-module.exports = { pool, initDB };
+const provisionRuntimeAdmin = async () => {
+  const email = process.env.PROVISION_ADMIN_EMAIL;
+  const password = process.env.PROVISION_ADMIN_PASSWORD;
+  if (!email || !password) throw new Error('runtime admin credentials are required');
+  const hash = await bcrypt.hash(password, 10);
+  await pool.query(
+    `INSERT INTO users (email, password, name, role)
+     VALUES ($1, $2, $3, 'admin')
+     ON CONFLICT (email) DO UPDATE SET password=EXCLUDED.password, name=EXCLUDED.name, role='admin', updated_at=NOW()`,
+    [email.toLowerCase(), hash, process.env.PROVISION_ADMIN_NAME || 'Runtime Admin']
+  );
+};
+
+module.exports = { pool, initDB, provisionRuntimeAdmin };

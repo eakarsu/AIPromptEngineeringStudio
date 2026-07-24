@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$PROJECT_DIR"
+set -a
+# shellcheck disable=SC1091
+source ./.env
+set +a
 BACKEND_PORT="${BACKEND_PORT:-3001}"
 FRONTEND_PORT="${FRONTEND_PORT:-3000}"
 CHILD_PIDS=()
@@ -13,7 +18,7 @@ require_file "$PROJECT_DIR/.env"
 require_dir "$PROJECT_DIR/backend/node_modules"
 require_dir "$PROJECT_DIR/frontend/node_modules"
 port_free "$BACKEND_PORT";port_free "$FRONTEND_PORT"
-(cd "$PROJECT_DIR/backend"&&BACKEND_PORT="$BACKEND_PORT" node server.js)&CHILD_PIDS+=("$!")
-(cd "$PROJECT_DIR/frontend"&&PORT="$FRONTEND_PORT" BROWSER=none npm start)&CHILD_PIDS+=("$!")
+(cd "$PROJECT_DIR/backend"&&exec env BACKEND_PORT="$BACKEND_PORT" node server.js)&CHILD_PIDS+=("$!")
+(cd "$PROJECT_DIR/frontend"&&exec env PORT="$FRONTEND_PORT" BROWSER=none ./node_modules/.bin/react-scripts start)&CHILD_PIDS+=("$!")
 echo "Prompt studio services started without installing, seeding, migrating, or reclaiming ports."
 wait "${CHILD_PIDS[@]}"

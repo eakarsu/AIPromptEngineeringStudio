@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { ipKeyGenerator } = require('express-rate-limit');
 require('dotenv').config({ path: '../.env' });
-const { initDB } = require('./db');
+const { initDB, provisionRuntimeAdmin } = require('./db');
 const { validateRuntime } = require('./governance/runtime');
 const { createProviderGate } = require('./governance/providerGate');
 const governanceRouter = require('./governance/router');
@@ -238,7 +238,10 @@ app.get('/api/health', (req, res) => {
 // Start server
 const start = async () => {
   try {
-    if (process.env.ENABLE_LEGACY_SCHEMA_BOOTSTRAP === 'true') await initDB();
+    if (process.env.MIGRATE_ON_START === 'true') {
+      await initDB();
+      await provisionRuntimeAdmin();
+    }
     app.listen(PORT, () => {
       console.log(`Backend server running on port ${PORT}`);
     });

@@ -1,4 +1,5 @@
-const API_BASE = '/api';
+const configuredBase = (process.env.REACT_APP_API_URL || '').replace(/\/+$/, '');
+const API_BASE = configuredBase ? `${configuredBase}/api` : '/api';
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',

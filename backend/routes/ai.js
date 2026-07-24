@@ -4,7 +4,7 @@ const { authenticateToken } = require('../middleware/auth');
 const router = express.Router();
 
 const callOpenRouter = async (messages, options = {}) => {
-  const response = await fetch(process.env.OPENROUTER_BASE_URL + '/chat/completions', {
+  const response = await fetch(`${process.env.OPENROUTER_BASE_URL.replace(/\/+$/, '')}/chat/completions`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
@@ -25,7 +25,9 @@ const callOpenRouter = async (messages, options = {}) => {
     throw new Error(`OpenRouter API error: ${response.status} - ${errorData}`);
   }
 
-  return await response.json();
+  const data = await response.json();
+  if (!data.choices?.[0]?.message?.content?.trim()) throw new Error('OpenRouter returned no substantive content');
+  return data;
 };
 
 // Playground - Run prompt
@@ -75,6 +77,19 @@ router.post('/playground/run', authenticateToken, async (req, res) => {
       cost,
       raw_response: aiResponse
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/history', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, metric_type, model, success, recorded_at
+       FROM analytics WHERE user_id=$1 ORDER BY recorded_at DESC LIMIT 25`,
+      [req.user.id]
+    );
+    res.json({ total: result.rowCount, data: result.rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
